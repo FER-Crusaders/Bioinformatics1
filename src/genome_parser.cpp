@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <genome_parser.hpp>
+#include "genome_parser.hpp"
 #include <vector>
 #include <cstring>
 #include <bitset>
@@ -20,7 +20,7 @@ int encode_nucleotide(char c) {
 }
 
 
-ProcessedGenome parse_genome(string& path){
+ProcessedGenome parse_genome(const string& path){
     ifstream file(path);
     string line;
     int bits_filled = 0;
@@ -32,7 +32,7 @@ ProcessedGenome parse_genome(string& path){
     vector<uint8_t> buf;
     buf.reserve(1 << 20);   
     while(getline(file,line)){
-        if(line[0] ==  '>' || line.empty()){
+        if(line.empty() || line[0] ==  '>'){
             continue;
         }
         for(int i = 0; i < (int)line.size(); i++){

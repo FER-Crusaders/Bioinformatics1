@@ -1,4 +1,3 @@
-#pragma once
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -8,4 +7,4 @@ struct ProcessedGenome {
     unsigned long long length;
 };
 
-ProcessedGenome parse_genome(std::string& path);
+ProcessedGenome parse_genome(const std::string& path);
