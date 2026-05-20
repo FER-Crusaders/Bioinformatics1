@@ -19,12 +19,14 @@ private:
     using Fingerprint = uint16_t;
 
     size_t numBuckets;
+    size_t bucketMask;
     size_t bucketSize;
     size_t maxKicks;
     size_t itemCount;
 
     std::vector<std::vector<std::optional<Fingerprint>>> buckets;
     std::mt19937 rng;
+    static size_t nextPowerOfTwo(size_t n);
     size_t hashItem(T item) ;
     Fingerprint fingerprint( T item) ;
     size_t indexHash( T item) ;

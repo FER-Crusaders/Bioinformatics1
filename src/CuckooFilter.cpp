@@ -8,6 +8,22 @@
 #include <utility>
 
 template<typename T>
+size_t CuckooFilter<T>::nextPowerOfTwo(size_t n) {
+
+    if (n < 2) {
+        return 1;
+    }
+
+    size_t p = 1;
+
+    while (p < n) {
+        p <<= 1;
+    }
+
+    return p;
+}
+
+template<typename T>
 size_t CuckooFilter<T>::hashItem(T item) {
 
     return std::hash<T>{}(item);
@@ -30,7 +46,7 @@ CuckooFilter<T>::fingerprint(T item) {
 template<typename T>
 size_t CuckooFilter<T>::indexHash(T item) {
 
-    return hashItem(item) % numBuckets;
+    return hashItem(item) & bucketMask;
 }
 
 template<typename T>
@@ -39,8 +55,9 @@ size_t CuckooFilter<T>::altIndex(
     Fingerprint fp
 ) {
 
-    return (index ^ std::hash<Fingerprint>{}(fp))
-        % numBuckets;
+    size_t h = std::hash<Fingerprint>{}(fp) & bucketMask;
+
+    return index ^ h;
 }
 
 template<typename T>
@@ -49,16 +66,17 @@ CuckooFilter<T>::CuckooFilter(
     size_t bucketSize,
     size_t maxKicks
 )
-    : numBuckets(numBuckets),
+    : numBuckets(nextPowerOfTwo(numBuckets)),
+      bucketMask(this->numBuckets - 1),
       bucketSize(bucketSize),
       maxKicks(maxKicks),
       itemCount(0),
       rng(std::random_device{}())
 {
 
-    buckets.resize(numBuckets);
+    buckets.resize(this->numBuckets);
 
-    for (size_t i = 0; i < numBuckets; i++) {
+    for (size_t i = 0; i < this->numBuckets; i++) {
 
         buckets[i].resize(bucketSize, std::nullopt);
     }
