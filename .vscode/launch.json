@@ -1,13 +1,14 @@
 {
+    "version": "0.2.0",
     "configurations": [
         {
             "name": "C/C++: g++ build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "program": "${fileDirname}\\output\\${fileBasenameNoExtension}.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${fileDirname}\\output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -24,8 +25,33 @@
                 }
             ],
             "preLaunchTask": "C/C++: g++ build active file",
-            "miDebuggerPath": "/usr/bin/gdb"
+            "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe"
+        },
+        {
+            "name": "C/C++: debug genome test (multi-file)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\output\\genomeTestImplementation.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C/C++: build genome test (multi-file)",
+            "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe"
         }
-    ],
-    "version": "2.0.0"
+    ]
 }
