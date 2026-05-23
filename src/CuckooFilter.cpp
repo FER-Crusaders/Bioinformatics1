@@ -99,7 +99,6 @@ bool CuckooFilter<T>::insert(T item) {
 
             buckets[i1][j] = fp;
             itemCount++;
-            print();
             return true;
         }
     }
@@ -110,7 +109,6 @@ bool CuckooFilter<T>::insert(T item) {
 
             buckets[i2][j] = fp;
             itemCount++;
-            print();
             return true;
         }
     }
@@ -133,13 +131,10 @@ bool CuckooFilter<T>::insert(T item) {
 
                 buckets[index][j] = cur;
                 itemCount++;
-                print();
                 return true;
             }
         }
     }
-    print();
-
     return false;
 }
 
@@ -250,6 +245,68 @@ template<typename T>
 size_t CuckooFilter<T>::getNumBuckets() {
 
     return numBuckets;
+}
+
+template<typename T>
+void CuckooFilter<T>::save(std::ostream& os) {
+
+    uint64_t nb = static_cast<uint64_t>(numBuckets);
+    uint64_t bs = static_cast<uint64_t>(bucketSize);
+    uint64_t mk = static_cast<uint64_t>(maxKicks);
+    uint64_t ic = static_cast<uint64_t>(itemCount);
+
+    os.write(reinterpret_cast<const char*>(&nb), sizeof(nb));
+    os.write(reinterpret_cast<const char*>(&bs), sizeof(bs));
+    os.write(reinterpret_cast<const char*>(&mk), sizeof(mk));
+    os.write(reinterpret_cast<const char*>(&ic), sizeof(ic));
+
+    // 0 znaci prazan slot (fingerprint() nikad ne vraca 0).
+    for (size_t i = 0; i < numBuckets; i++) {
+
+        for (size_t j = 0; j < bucketSize; j++) {
+
+            uint16_t v = buckets[i][j].has_value()
+                ? static_cast<uint16_t>(buckets[i][j].value())
+                : static_cast<uint16_t>(0);
+
+            os.write(reinterpret_cast<const char*>(&v), sizeof(v));
+        }
+    }
+}
+
+template<typename T>
+void CuckooFilter<T>::load(std::istream& is) {
+
+    uint64_t nb = 0, bs = 0, mk = 0, ic = 0;
+
+    is.read(reinterpret_cast<char*>(&nb), sizeof(nb));
+    is.read(reinterpret_cast<char*>(&bs), sizeof(bs));
+    is.read(reinterpret_cast<char*>(&mk), sizeof(mk));
+    is.read(reinterpret_cast<char*>(&ic), sizeof(ic));
+
+    numBuckets = static_cast<size_t>(nb);
+    bucketMask = numBuckets - 1;
+    bucketSize = static_cast<size_t>(bs);
+    maxKicks   = static_cast<size_t>(mk);
+    itemCount  = static_cast<size_t>(ic);
+
+    buckets.assign(
+        numBuckets,
+        std::vector<std::optional<Fingerprint>>(bucketSize, std::nullopt)
+    );
+
+    for (size_t i = 0; i < numBuckets; i++) {
+
+        for (size_t j = 0; j < bucketSize; j++) {
+
+            uint16_t v = 0;
+            is.read(reinterpret_cast<char*>(&v), sizeof(v));
+
+            if (v != 0) {
+                buckets[i][j] = static_cast<Fingerprint>(v);
+            }
+        }
+    }
 }
 
 template class CuckooFilter<unsigned char>;

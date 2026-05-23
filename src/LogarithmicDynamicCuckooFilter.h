@@ -7,6 +7,8 @@
 
 #include "CuckooFilter.h"
 
+#include <string>
+
 template<typename T>
 class LogarithmicDynamicCuckooFilter {
 
@@ -36,6 +38,14 @@ public:
     bool erase(T item);
     void print();
     size_t numberOfFilters();
+
+    // Ukupan broj pohranjenih stavki (zbroj po svim pod-filterima).
+    size_t size();
+
+    // Spremanje/ucitavanje cijelog napunjenog LDCF-a (svi pod-filteri) u/iz
+    // binarne datoteke. Logika filtera ostaje nepromijenjena.
+    bool save(const std::string& path);
+    bool load(const std::string& path);
 };
 
 #endif

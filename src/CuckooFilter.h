@@ -10,6 +10,7 @@
 #include <random>
 #include <functional>
 #include <cstdint>
+#include <iosfwd>
 
 template<typename T>
 class CuckooFilter {
@@ -49,6 +50,11 @@ public:
     void print() ;
     size_t size() ;
     size_t getNumBuckets() ;
+
+    // Binarna (de)serijalizacija stanja filtera. Ne mijenja logiku filtera,
+    // samo zapisuje/čita postojeća polja u/iz toka.
+    void save(std::ostream& os);
+    void load(std::istream& is);
 };
 
 #endif
