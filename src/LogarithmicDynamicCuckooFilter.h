@@ -14,17 +14,21 @@ class LogarithmicDynamicCuckooFilter {
 
 private:
 
+    // Collection of cuckoo filters
     std::vector<CuckooFilter<T>> filters;
 
+    // Filter configuration
     size_t initialBuckets;
     size_t bucketSize;
     size_t growthFactor;
     size_t maxKicks;
 
+    // Adds a new filter layer
     void addFilter();
 
 public:
 
+    // Constructor
     LogarithmicDynamicCuckooFilter(
         size_t initialBuckets,
         size_t bucketSize,
@@ -32,19 +36,31 @@ public:
         size_t maxKicks = 500
     );
 
+    // Destructor
     ~LogarithmicDynamicCuckooFilter();
+
+    // Inserts item into filter
     bool insert(T item);
+
+    // Checks if item exists
     bool contains(T item);
+
+    // Removes item from filter
     bool erase(T item);
+
+    // Prints all filters
     void print();
+
+    // Returns number of filters
     size_t numberOfFilters();
 
-    // Ukupan broj pohranjenih stavki (zbroj po svim pod-filterima).
+    // Returns total item count
     size_t size();
 
-    // Spremanje/ucitavanje cijelog napunjenog LDCF-a (svi pod-filteri) u/iz
-    // binarne datoteke. Logika filtera ostaje nepromijenjena.
+    // Saves filter data
     bool save(const std::string& path);
+
+    // Loads filter data
     bool load(const std::string& path);
 };
 
