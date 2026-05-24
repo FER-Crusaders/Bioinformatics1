@@ -23,18 +23,26 @@ size_t CuckooFilter<T>::nextPowerOfTwo(size_t n) {
     return p;
 }
 
+static inline uint64_t splitmix64(uint64_t z) {
+    z += 0x9E3779B97F4A7C15ULL;
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+    return z ^ (z >> 31);
+}
+
 template<typename T>
 size_t CuckooFilter<T>::hashItem(T item) {
 
-    return std::hash<T>{}(item);
+    return static_cast<size_t>(
+        splitmix64(static_cast<uint64_t>(std::hash<T>{}(item)))
+    );
 }
 
 template<typename T>
 typename CuckooFilter<T>::Fingerprint
 CuckooFilter<T>::fingerprint(T item) {
-
     Fingerprint fp =
-        static_cast<Fingerprint>(hashItem(item) & 0xFFFF);
+        static_cast<Fingerprint>(hashItem(item) >> 48);
 
     if (fp == 0) {
         fp = 1;
@@ -55,7 +63,7 @@ size_t CuckooFilter<T>::altIndex(
     Fingerprint fp
 ) {
 
-    size_t h = std::hash<Fingerprint>{}(fp) & bucketMask;
+    size_t h = static_cast<size_t>(splitmix64(fp)) & bucketMask;
 
     return index ^ h;
 }
