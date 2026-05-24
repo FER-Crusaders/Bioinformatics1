@@ -1,3 +1,7 @@
+// =======================================
+// genomeGenerator.cpp
+// =======================================
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -8,6 +12,7 @@
 #include <sstream>
 
 // Written by Borna Covic
+// Returns current date and time as a string
 std::string getDate() {
     std::time_t t = std::time(nullptr);
     std::tm* tm = std::localtime(&t);
@@ -17,6 +22,8 @@ std::string getDate() {
 }
 
 // Written by Borna Covic
+// Writes a sequence to file in FASTA format
+// Splits the sequence into lines of nbchar characters
 void writeFasta(
     std::ofstream& file,
     const std::string& header,
@@ -32,14 +39,19 @@ void writeFasta(
 // Written by Borna Covic, edited by Borna Zelic
 int main() {
 
+    // Number of sequences to generate
     int numSequences = 2;
 
+    // Random generator with fixed seed
     std::mt19937 rng(1000);
 
+    // Nucleotide alphabet
     std::vector<char> DNA = {'A', 'T', 'C', 'G'};
 
+    // Uniform distribution over nucleotides
     std::discrete_distribution<int> dnaDist({0.25, 0.25, 0.25, 0.25});
 
+    // Output file path
     std::string filename = "../data/DNA-"
                          + std::to_string(numSequences)
                          + ".fasta";
@@ -52,13 +64,17 @@ int main() {
     }
 
     for (int i = 1; i <= numSequences; i++) {
+
+        // Random sequence length
         std::uniform_int_distribution<int> lengthDist(4500000, 4600000);
         int seqLength = lengthDist(rng);
 
+        // FASTA header line
         std::string header = std::to_string(i)
                            + " Simulated E. coli genome | length="
                            + std::to_string(seqLength);
 
+        // Generate random nucleotide sequence
         std::string sequence;
         sequence.reserve(seqLength);
 

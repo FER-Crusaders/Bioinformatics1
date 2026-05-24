@@ -1,23 +1,5 @@
 // =======================================
 // genomeTestImplementation.cpp
-//
-// Testni okvir za Logarithmic Dynamic Cuckoo Filter (LDCF).
-//
-// Sto radi:
-//   * za svaki k iz {10, 20, 50, 100, 200} gradi LDCF nad razlicitim
-//     k-merima iz genoma (E. coli + umjetno generirani podaci),
-//   * napunjeni LDCF SPREMA na disk (data/ldcf_cache/...),
-//   * pri sljedecem pokretanju filter se UCITAVA s diska umjesto da se
-//     iznova puni k-merima ("plug-in" nacin) -> bitno brze testiranje,
-//   * trazi slucajne podnizove (k-mere):
-//       - pozitivni upiti: slucajne pozicije iz genoma  -> ocekivano "found"
-//       - negativni upiti: slucajni 64-bitni kljucevi   -> mjerenje FPR-a,
-//   * ispisuje vrijeme, broj pod-filtera, FPR i procjenu memorije.
-//
-// Napomena o kljucevima: k-mer (niz duljine k) preslikava se u 64-bitni
-// kljuc preko std::hash<std::string_view>. Hashiranje je u libstdc++
-// deterministicko izmedu pokretanja, pa filter spremljen u jednom
-// pokretanju ostaje konzistentan s upitima u drugom (cache je valjan).
 // =======================================
 
 #include <iostream>
@@ -28,7 +10,7 @@
 #include <chrono>
 #include <cstdint>
 #include <optional>
-#include <functional>   // std::hash
+#include <functional>
 #include <stdexcept>
 #include <random>
 #include <unordered_set>
@@ -40,33 +22,34 @@
 
 namespace fs = std::filesystem;
 
-// ----------------------- konfiguracija -----------------------
-
+// k-mer lengths to test
 static const std::vector<int> K_VALUES = {10, 20, 50, 100, 200};
 
-// Pocetni broj bucketa namjerno je umjeren da se kod vecih k jasno vidi
-// dinamicki ("logaritamski") rast u vise pod-filtera.
-static const size_t INITIAL_BUCKETS = static_cast<size_t>(1) << 18; // 262144
+// Filter configuration
+static const size_t INITIAL_BUCKETS = static_cast<size_t>(1) << 18;
 static const size_t BUCKET_SIZE     = 4;
 static const size_t GROWTH_FACTOR   = 2;
 static const size_t MAX_KICKS       = 500;
 
-static const size_t NUM_POSITIVE_QUERIES = 100000;   // slucajni postojeci k-meri
-static const size_t NUM_NEGATIVE_QUERIES = 1000000;  // slucajni kljucevi (FPR)
+// Number of queries per test
+static const size_t NUM_POSITIVE_QUERIES = 100000;
+static const size_t NUM_NEGATIVE_QUERIES = 1000000;
 
+// Cache directory for saved filters
 static const std::string CACHE_DIR = "../data/ldcf_cache";
 
 using Clock = std::chrono::high_resolution_clock;
 
 // Written by Borna Covic
+// Returns elapsed milliseconds since a time point
 static double msSince(const Clock::time_point& start) {
     auto end = Clock::now();
     return std::chrono::duration<double, std::milli>(end - start).count();
 }
 
-// ----------------------- ucitavanje genoma -----------------------
-
 // Written by Borna Covic
+// Reads genome sequence from a FASTA file
+// Keeps only the A, C, G and T characters
 static std::string readGenome(const std::string& path) {
 
     std::ifstream file(path);
@@ -95,17 +78,15 @@ static std::string readGenome(const std::string& path) {
 }
 
 // Written by Borna Covic
-// k-mer [pos, pos+k) -> 64-bitni kljuc (bez kopiranja podniza).
+// Computes a 64-bit key for a k-mer
 static inline uint64_t kmerKey(const std::string& seq, size_t pos, int k) {
     std::string_view sv(seq.data() + pos, static_cast<size_t>(k));
     return static_cast<uint64_t>(std::hash<std::string_view>{}(sv));
 }
 
-// ----------------------- gradnja filtera -----------------------
-
 // Written by Borna Covic
-// Umece razlicite (distinct) k-mere genoma. Membership filter odgovara na
-// pitanje "postoji li ovaj k-mer u genomu", pa duplikate izostavljamo.
+// Inserts all distinct k-mers of the genome into the filter
+// Duplicate k-mers are skipped
 static void buildFromGenome(
     LogarithmicDynamicCuckooFilter<uint64_t>& filter,
     const std::string& seq,
@@ -128,11 +109,9 @@ static void buildFromGenome(
     }
 }
 
-// ----------------------- upiti -----------------------
-
 // Written by Borna Covic
-// Pozitivni upiti: slucajne pozicije iz genoma -> ocekivano ~100% pronadeno.
-// Vraca udio pronadenih (manje od 1.0 = lazni negativ ili izgubljena stavka).
+// Queries random existing k-mers
+// Returns the fraction that were found
 static double positiveQueryRate(
     LogarithmicDynamicCuckooFilter<uint64_t>& filter,
     const std::string& seq,
@@ -161,8 +140,8 @@ static double positiveQueryRate(
 }
 
 // Written by Borna Covic
-// Negativni upiti: slucajni 64-bitni kljucevi (gotovo sigurno NISU umetnuti).
-// Svaki "found" je lazno pozitivan -> FPR. Usput mjeri propusnost upita.
+// Queries random keys to measure the false positive rate
+// Also reports query throughput
 static double falsePositiveRate(
     LogarithmicDynamicCuckooFilter<uint64_t>& filter,
     std::mt19937_64& rng,
@@ -189,7 +168,7 @@ static double falsePositiveRate(
 }
 
 // Written by Borna Covic
-// Procjena memorije: sve bucket slotove svih pod-filtera puta velicina slota.
+// Estimates total filter memory in megabytes
 static double estimateMemoryMB(size_t numFilters) {
 
     unsigned long long totalBuckets = 0;
@@ -205,13 +184,11 @@ static double estimateMemoryMB(size_t numFilters) {
     return (totalBuckets * BUCKET_SIZE * slotBytes) / (1024.0 * 1024.0);
 }
 
-// ----------------------- glavni program -----------------------
-
 // Written by Borna Covic, edited by Borna Zelic
+// Test program entry point
 int main(int argc, char** argv) {
 
-    // (name, path); putanje su relativne na korijen radnog prostora
-    // (multi-file launch konfiguracija postavlja cwd = ${workspaceFolder}).
+    // Dataset paths, overridable from the command line
     std::string ecoliPath = "../data/ecoli_k12_refseq.fasta";
     std::string genPath   = "../data/DNA-2.fasta";
 
@@ -223,6 +200,7 @@ int main(int argc, char** argv) {
         {"generated", genPath}
     };
 
+    // Make sure the cache directory exists
     std::error_code ec;
     fs::create_directories(CACHE_DIR, ec);
 
@@ -235,6 +213,7 @@ int main(int argc, char** argv) {
     std::cout << "Cache: " << CACHE_DIR
               << "  (1. pokretanje gradi i sprema, sljedeca ucitavaju)\n\n";
 
+    // Print results table header
     std::cout << std::left
               << std::setw(11) << "dataset"
               << std::setw(6)  << "k"
@@ -259,6 +238,7 @@ int main(int argc, char** argv) {
             continue;
         }
 
+        // Read the genome sequence
         std::string genome;
         try {
             genome = readGenome(path);
@@ -282,6 +262,7 @@ int main(int argc, char** argv) {
             const char* mode;
             double timeMs;
 
+            // Load filter from cache, or build it from the genome
             if (fs::exists(cachePath)) {
 
                 auto start = Clock::now();
@@ -313,6 +294,7 @@ int main(int argc, char** argv) {
                 mode = "build";
             }
 
+            // Run positive and negative queries
             double posRate = positiveQueryRate(
                 filter, genome, k, rng, NUM_POSITIVE_QUERIES
             );
@@ -324,6 +306,7 @@ int main(int argc, char** argv) {
 
             double memMB = estimateMemoryMB(filter.numberOfFilters());
 
+            // Print results for this k
             std::cout << std::left
                       << std::setw(11) << name
                       << std::setw(6)  << k
