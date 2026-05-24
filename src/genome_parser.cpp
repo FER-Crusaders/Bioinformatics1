@@ -19,7 +19,7 @@ int encode_nucleotide(char c) {
     }
 }
 
-
+// Written by Borna Covic, edited by Borna Zelic
 ProcessedGenome parse_genome(const string& path){
     ifstream file(path);
     string line;

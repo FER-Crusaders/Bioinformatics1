@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 
+// Written by Borna Covic
 std::string getDate() {
     std::time_t t = std::time(nullptr);
     std::tm* tm = std::localtime(&t);
@@ -15,6 +16,7 @@ std::string getDate() {
     return oss.str();
 }
 
+// Written by Borna Covic
 void writeFasta(
     std::ofstream& file,
     const std::string& header,
@@ -27,6 +29,7 @@ void writeFasta(
     }
 }
 
+// Written by Borna Covic, edited by Borna Zelic
 int main() {
 
     int numSequences = 2;

@@ -58,6 +58,7 @@ static const std::string CACHE_DIR = "../data/ldcf_cache";
 
 using Clock = std::chrono::high_resolution_clock;
 
+// Written by Borna Covic
 static double msSince(const Clock::time_point& start) {
     auto end = Clock::now();
     return std::chrono::duration<double, std::milli>(end - start).count();
@@ -65,6 +66,7 @@ static double msSince(const Clock::time_point& start) {
 
 // ----------------------- ucitavanje genoma -----------------------
 
+// Written by Borna Covic
 static std::string readGenome(const std::string& path) {
 
     std::ifstream file(path);
@@ -92,6 +94,7 @@ static std::string readGenome(const std::string& path) {
     return sequence;
 }
 
+// Written by Borna Covic
 // k-mer [pos, pos+k) -> 64-bitni kljuc (bez kopiranja podniza).
 static inline uint64_t kmerKey(const std::string& seq, size_t pos, int k) {
     std::string_view sv(seq.data() + pos, static_cast<size_t>(k));
@@ -100,6 +103,7 @@ static inline uint64_t kmerKey(const std::string& seq, size_t pos, int k) {
 
 // ----------------------- gradnja filtera -----------------------
 
+// Written by Borna Covic
 // Umece razlicite (distinct) k-mere genoma. Membership filter odgovara na
 // pitanje "postoji li ovaj k-mer u genomu", pa duplikate izostavljamo.
 static void buildFromGenome(
@@ -126,6 +130,7 @@ static void buildFromGenome(
 
 // ----------------------- upiti -----------------------
 
+// Written by Borna Covic
 // Pozitivni upiti: slucajne pozicije iz genoma -> ocekivano ~100% pronadeno.
 // Vraca udio pronadenih (manje od 1.0 = lazni negativ ili izgubljena stavka).
 static double positiveQueryRate(
@@ -155,6 +160,7 @@ static double positiveQueryRate(
     return static_cast<double>(found) / numQueries;
 }
 
+// Written by Borna Covic
 // Negativni upiti: slucajni 64-bitni kljucevi (gotovo sigurno NISU umetnuti).
 // Svaki "found" je lazno pozitivan -> FPR. Usput mjeri propusnost upita.
 static double falsePositiveRate(
@@ -182,6 +188,7 @@ static double falsePositiveRate(
     return static_cast<double>(falsePos) / numQueries;
 }
 
+// Written by Borna Covic
 // Procjena memorije: sve bucket slotove svih pod-filtera puta velicina slota.
 static double estimateMemoryMB(size_t numFilters) {
 
@@ -200,6 +207,7 @@ static double estimateMemoryMB(size_t numFilters) {
 
 // ----------------------- glavni program -----------------------
 
+// Written by Borna Covic, edited by Borna Zelic
 int main(int argc, char** argv) {
 
     // (name, path); putanje su relativne na korijen radnog prostora

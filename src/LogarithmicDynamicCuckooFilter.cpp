@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 
+// Written by Borna Zelic
 // Adds a new cuckoo filter
 template<typename T>
 void LogarithmicDynamicCuckooFilter<T>::addFilter() {
@@ -31,6 +32,7 @@ void LogarithmicDynamicCuckooFilter<T>::addFilter() {
     );
 }
 
+// Written by Borna Zelic
 // LogarithmicDynamicCuckooFilter constructor
 template<typename T>
 LogarithmicDynamicCuckooFilter<T>::
@@ -49,11 +51,13 @@ LogarithmicDynamicCuckooFilter(
     addFilter();
 }
 
+// Written by Borna Zelic
 // LogarithmicDynamicCuckooFilter destructor
 template<typename T>
 LogarithmicDynamicCuckooFilter<T>::
 ~LogarithmicDynamicCuckooFilter() {}
 
+// Written by Borna Zelic
 // Inserts item into filters
 // If there is no space in current filters, it adds a new filter and tries again
 template<typename T>
@@ -70,6 +74,7 @@ bool LogarithmicDynamicCuckooFilter<T>::insert(
     return filters.back().insert(item);
 }
 
+// Written by Borna Zelic
 // Checks if item exists in any filter
 template<typename T>
 bool LogarithmicDynamicCuckooFilter<T>::contains(T item) {
@@ -86,6 +91,7 @@ bool LogarithmicDynamicCuckooFilter<T>::contains(T item) {
     return false;
 }
 
+// Written by Borna Zelic
 // Removes item from filters
 template<typename T>
 bool LogarithmicDynamicCuckooFilter<T>::erase(T item) {
@@ -102,6 +108,7 @@ bool LogarithmicDynamicCuckooFilter<T>::erase(T item) {
     return false;
 }
 
+// Written by Borna Zelic
 // Prints all filter contents
 template<typename T>
 void LogarithmicDynamicCuckooFilter<T>::print() {
@@ -120,6 +127,7 @@ void LogarithmicDynamicCuckooFilter<T>::print() {
     }
 }
 
+// Written by Borna Zelic
 // Returns number of filters
 template<typename T>
 size_t
@@ -128,6 +136,7 @@ LogarithmicDynamicCuckooFilter<T>::numberOfFilters() {
     return filters.size();
 }
 
+// Written by Borna Covic
 // Returns total item count
 template<typename T>
 size_t LogarithmicDynamicCuckooFilter<T>::size() {
@@ -144,6 +153,7 @@ size_t LogarithmicDynamicCuckooFilter<T>::size() {
 // File format identifier
 static const uint64_t LDCF_MAGIC = 0x4C444346554C4C30ULL;
 
+// Written by Borna Covic
 // Saves all filters to file
 template<typename T>
 bool LogarithmicDynamicCuckooFilter<T>::save(const std::string& path) {
@@ -175,6 +185,7 @@ bool LogarithmicDynamicCuckooFilter<T>::save(const std::string& path) {
     return static_cast<bool>(os);
 }
 
+// Written by Borna Covic
 // Loads all filters from file
 template<typename T>
 bool LogarithmicDynamicCuckooFilter<T>::load(const std::string& path) {

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <utility>
 
+// Written by Borna Covic
 // Returns the next power of two
 template<typename T>
 size_t CuckooFilter<T>::nextPowerOfTwo(size_t n) {
@@ -24,6 +25,7 @@ size_t CuckooFilter<T>::nextPowerOfTwo(size_t n) {
     return p;
 }
 
+// Written by Borna Covic and Borna Zelic
 // SplitMix64 hash function
 static inline uint64_t splitmix64(uint64_t z) {
     z += 0x9E3779B97F4A7C15ULL;
@@ -32,6 +34,7 @@ static inline uint64_t splitmix64(uint64_t z) {
     return z ^ (z >> 31);
 }
 
+// Written by Borna Zelic, edited by Borna Covic
 // Computes item hash
 template<typename T>
 size_t CuckooFilter<T>::hashItem(T item) {
@@ -41,6 +44,7 @@ size_t CuckooFilter<T>::hashItem(T item) {
     );
 }
 
+// Written by Borna Zelic, edited by Borna Covic
 // Generates item fingerprint
 template<typename T>
 typename CuckooFilter<T>::Fingerprint
@@ -55,6 +59,7 @@ CuckooFilter<T>::fingerprint(T item) {
     return fp;
 }
 
+// Written by Borna Zelic, edited by Borna Covic
 // Computes primary bucket index
 template<typename T>
 size_t CuckooFilter<T>::indexHash(T item) {
@@ -62,6 +67,7 @@ size_t CuckooFilter<T>::indexHash(T item) {
     return hashItem(item) & bucketMask;
 }
 
+// Written by Borna Zelic, edited by Borna Covic
 // Computes alternate bucket index
 template<typename T>
 size_t CuckooFilter<T>::altIndex(
@@ -74,6 +80,7 @@ size_t CuckooFilter<T>::altIndex(
     return index ^ h;
 }
 
+// Writen by Borna Zelic, edited by Borna Covic
 // Cuckoo filter constructor
 template<typename T>
 CuckooFilter<T>::CuckooFilter(
@@ -97,10 +104,12 @@ CuckooFilter<T>::CuckooFilter(
     }
 }
 
+// Written by Borna Zelic
 // Cuckoo filter destructor
 template<typename T>
 CuckooFilter<T>::~CuckooFilter() {}
 
+// Written by Borna Zelic
 // Inserts item into filter
 // If insertion fails on first try, it performs up to maxKicks relocations
 template<typename T>
@@ -156,6 +165,7 @@ bool CuckooFilter<T>::insert(T item) {
     return false;
 }
 
+// Written by Borna Zelic
 // Checks if item is present in any bucket
 template<typename T>
 std::pair<size_t, size_t> CuckooFilter<T>::contains(T item) {
@@ -185,6 +195,7 @@ std::pair<size_t, size_t> CuckooFilter<T>::contains(T item) {
     return {-1, -1};
 }
 
+// Written by Borna Zelic
 // Removes item from filter
 template<typename T>
 std::pair<size_t, size_t> CuckooFilter<T>::erase(T item) {
@@ -222,6 +233,7 @@ std::pair<size_t, size_t> CuckooFilter<T>::erase(T item) {
     return {-1, -1};
 }
 
+// Written by Borna Zelic
 // Returns current load factor
 template<typename T>
 double CuckooFilter<T>::loadFactor() {
@@ -230,6 +242,7 @@ double CuckooFilter<T>::loadFactor() {
         / (numBuckets * bucketSize);
 }
 
+// Written by Borna Zelic
 // Checks if filter is near capacity
 template<typename T>
 bool CuckooFilter<T>::isFull() {
@@ -237,6 +250,7 @@ bool CuckooFilter<T>::isFull() {
     return loadFactor() > 0.95;
 }
 
+// Written by Borna Zelic
 // Prints bucket contents
 template<typename T>
 void CuckooFilter<T>::print() {
@@ -258,6 +272,7 @@ void CuckooFilter<T>::print() {
     }
 }
 
+// Written by Borna Zelic
 // Returns stored item count
 template<typename T>
 size_t CuckooFilter<T>::size() {
@@ -265,6 +280,7 @@ size_t CuckooFilter<T>::size() {
     return itemCount;
 }
 
+// Written by Borna Zelic
 // Returns total number of buckets
 template<typename T>
 size_t CuckooFilter<T>::getNumBuckets() {
@@ -272,6 +288,7 @@ size_t CuckooFilter<T>::getNumBuckets() {
     return numBuckets;
 }
 
+// Written by Borna Covic
 // Saves filter state to stream
 template<typename T>
 void CuckooFilter<T>::save(std::ostream& os) {
@@ -299,6 +316,7 @@ void CuckooFilter<T>::save(std::ostream& os) {
     }
 }
 
+// Written by Borna Covic
 // Loads filter state from stream
 template<typename T>
 void CuckooFilter<T>::load(std::istream& is) {

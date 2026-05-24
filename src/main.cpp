@@ -3,6 +3,7 @@
 #include "CuckooFilter.h"
 #include "LogarithmicDynamicCuckooFilter.h"
 
+// Written by Borna Zelic
 int main() {
 
     CuckooFilter<int> cf(8, 2);
