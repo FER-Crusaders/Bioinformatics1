@@ -37,7 +37,7 @@ int main() {
 
     std::discrete_distribution<int> dnaDist({0.25, 0.25, 0.25, 0.25});
 
-    std::string filename = "../../data/" + getDate() + "-DNA-"
+    std::string filename = "../data/DNA-"
                          + std::to_string(numSequences)
                          + ".fasta";
 

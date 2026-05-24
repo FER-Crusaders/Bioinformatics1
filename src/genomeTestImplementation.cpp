@@ -54,7 +54,7 @@ static const size_t MAX_KICKS       = 500;
 static const size_t NUM_POSITIVE_QUERIES = 100000;   // slucajni postojeci k-meri
 static const size_t NUM_NEGATIVE_QUERIES = 1000000;  // slucajni kljucevi (FPR)
 
-static const std::string CACHE_DIR = "data/ldcf_cache";
+static const std::string CACHE_DIR = "../data/ldcf_cache";
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -204,8 +204,8 @@ int main(int argc, char** argv) {
 
     // (name, path); putanje su relativne na korijen radnog prostora
     // (multi-file launch konfiguracija postavlja cwd = ${workspaceFolder}).
-    std::string ecoliPath = "data/ecoli_k12_refseq.fasta";
-    std::string genPath   = "data/2026-05-21-20-56-48-DNA-2.fasta";
+    std::string ecoliPath = "../data/ecoli_k12_refseq.fasta";
+    std::string genPath   = "../data/DNA-2.fasta";
 
     if (argc >= 2) ecoliPath = argv[1];
     if (argc >= 3) genPath   = argv[2];
