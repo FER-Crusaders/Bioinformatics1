@@ -3,6 +3,13 @@
 #include "CuckooFilter.h"
 #include "LogarithmicDynamicCuckooFilter.h"
 
+// Written by Borna Covic
+// Computes a 64-bit key for a k-mer
+static inline uint64_t kmerKey(const std::string& seq, size_t pos, int k) {
+    std::string_view sv(seq.data() + pos, static_cast<size_t>(k));
+    return static_cast<uint64_t>(std::hash<std::string_view>{}(sv));
+}
+
 // Written by Borna Zelic
 int main() {
 
@@ -70,6 +77,58 @@ int main() {
 
 
     dynamicCF.print();
+
+    CuckooFilter<uint64_t> cuckoo_filter(10, 2);
+   
+    std::string seq = "AGTGAATAGACTAC";
+    
+    for (size_t i = 0; i + 10 <= seq.size(); i++) {
+
+        uint64_t key = kmerKey(seq, i, 10);
+
+        cuckoo_filter.insert(key);
+    }
+
+
+
+    for (const std::string& x : {"AGTGAATAGA", "AGTGAATAGB"}) {
+
+        uint64_t key = kmerKey(x, 0, 10);
+
+        auto result = cuckoo_filter.contains(key);
+        
+        if (result.first != static_cast<size_t>(-1)) {
+            std::cout << x << " FOUND in bucket " << result.first << ", slot " << result.second << std::endl;
+        } else {
+            std::cout << x << " NOT FOUND" << std::endl;
+        }
+    }
+
+    cuckoo_filter.print();
+                
+                
+    LogarithmicDynamicCuckooFilter<int> dynamic_cuckoo_filter(4, 2, 2, 100);
+
+    std::string seq_long = "AGTGAATAGACTACAGGGTAGTCTAGCGCGGAAAACTGATACTAGGAATCTCACCTAAATACCTTCGGATTCCTTGCGATGCGTCACATGTCTGCCTCAAGAGCCGAGCCTTTGTAGTGC";
+    
+    for (size_t i = 0; i + 10 <= seq_long.size(); i++) {
+
+        uint64_t key = kmerKey(seq_long, i, 10);
+
+        dynamic_cuckoo_filter.insert(key);
+    }
+
+
+
+    for (const std::string& x : {"AGTGAATAGA", "AGTGAATAGB"}) {
+
+        uint64_t key = kmerKey(x, 0, 10);
+
+        bool found = dynamic_cuckoo_filter.contains(key);
+        std::cout << x << " -> " << (found ? "FOUND" : "NOT FOUND") << std::endl;
+    }
+
+    dynamic_cuckoo_filter.print();
 
     return 0;
 }
